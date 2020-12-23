@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Inventario</title>
+    <meta name="viewport" content="user-scalable=no,width=device-width" />
+    <script type="text/javascript" src="Js/jquery.js"></script>
+    <link rel="stylesheet"  type="text/css" href="Estilos/bootstrap.css" />
+</head>
+<body style="margin:30px">
+    <div class="container">
+
+        <div class="row">
+            <form>
+                <fieldset>
+                    <legend>Propiedad De La Empresa</legend>
+                    <legend>Numero De Empleado</legend>
+                    <input type="number" class="form-control" name="" id="NumeroEmpleadoAplicado" />
+                    <legend> Nombre del Articulo</legend>
+                    <input type="text" class="form-control" name="" id="NombreArticulo" />
+                    <legend> Fecha de Asignación</legend>
+                    <input type="date" class="form-control" name="" id="FechaAsignacion" />
+                    <legend> Estado de a Propriedad</legend>
+                    <input type="text" class="form-control" name="" id="EstadoPropiedad" />
+                    <legend> Area de Asignación</legend>
+                    <input type="text" class="form-control" name="" id="AreaAsignacion" />
+                    <legend> Descripción General</legend>
+                    <input type="text" class="form-control" name="" id="DescripcionGeneral" />
+                    <br /><br />
+                    <button type="button" id="insert" class="btn btn-success">Ingresar Propiedad</button>
+                    <button type="button" id="create" class="btn btn-success">Generar Tabla</button>
+                    <button type="button" id="remove" class="btn btn-danger">Borrar Tabla</button>
+                    <button type="button" id="list" class="btn btn-success">Lista</button>
+                </fieldset> <br />
+                <hr>
+                <h4>Lista de propiedades en la empresa</h4>
+                <table class="table table-bordered table-hover" id="itemlist1"></table> <br/>
+                <fieldset>
+                    <legend>Empleado</legend>
+                    <legend>Numero De Empleado</legend>
+                    <input type="number" class="form-control" name="" id="NumeroEmpleado" />
+                    <legend> Nombre</legend>
+                    <input type="text" class="form-control" name="" id="Nombre" />
+                    <legend> Fecha de Contratación</legend>
+                    <input type="date" class="form-control" name="" id="Fecha" />
+                    <legend> Area y Puesto de Trabajo </legend>
+                    <input type="text" class="form-control" name="" id="Area" />
+                    <legend> Domocilio del Empleado</legend>
+                    <input type="text" class="form-control" name="" id="Domicilio" />
+                    <br /> <br />
+                    <button type="button" id="insert2" class="btn btn-success">Ingresar Propiedad</button>
+                    <button type="button" id="create2" class="btn btn-success">Generar Tabla</button>
+                    <button type="button" id="delete2" class="btn btn-danger">Borrar Tabla</button>
+                    <button type="button" id="list2" class="btn btn-success">Cargar Lista</button>
+                </fieldset>
+            </form>
+            <hr>
+            <h4>Lista de Empleados</h4>
+            <table class="table table-bordered table-hover" id="itemlist2"></table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var db = openDatabase("Inventario", "1.0", "Inventario", 65535);
+        $(function () {
+            loadData1();
+            $('#create').click(function () {
+                db.transaction(function (transaction) {
+                    var sql = "CREATE TABLE PropiedadEmpresa" + "(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        "Articulo VARCHAR(50) NOT NULL," + "NumeroEmpleadoAplicado INT(10) NOT NULL," + "Fecha DATE NOT NULL," + "Estado TEXT NOT NULL," +
+                        "Area TEXT NOT NULL," + "Descripcion TEXT NOT NULL)";
+                    transaction.executeSql(sql,undefined,function(){
+	        	alert("La tabla fue creada");
+	            },function(){
+	              alert("La tabla ya ha sido creada");
+	                })
+                })
+            })
+            
+            $("#remove").click(function(){
+                if (!confirm("Estas seguro que quieres borrar esta tabla?", "")) return;;
+            db.transaction(function(transaction){
+        	var sql="DROP TABLE PropiedadEmpresa";
+        	transaction.executeSql(sql,undefined,function(){
+	    	alert("La tabla se borro correctamente")
+        	},function(transaction,err){
+	    	alert(err.message);
+	                })
+                });
+            });
+
+            $("#insert").click(function(){
+            var NumEmpAp=$("#NumeroEmpleadoAplicado").val();
+                var NomArt=$("#NombreArticulo").val();
+                var FechaAsig=$("#FechaAsignacion").val();
+                var EstadoProp=$("#EstadoPropiedad").val();
+                var AreaAsig=$("#AreaAsignacion").val();
+                var DescGeneral=$("#DescripcionGeneral").val();
+            db.transaction(function(transaction){
+            var sql="INSERT INTO PropiedadEmpresa(NumeroEmpleadoAplicado,Articulo,Fecha,Estado,Area,Descripcion) VALUES(?,?,?,?,?,?)";
+            transaction.executeSql(sql,[NumEmpAp,NomArt,FechaAsig,EstadoProp,AreaAsig,DescGeneral],function(){
+	        alert("Se añadio correctamente");
+            },function(transaction,err){
+	        alert(err.message);
+                    })
+            })
+
+            })
+             
+            $("#list").click(function(){
+            loadData1();
+            })
+
+            function loadData1(){
+		    $("#itemlist1").children().remove();
+	        db.transaction(function(transaction){
+		    var sql="SELECT * FROM PropiedadEmpresa ORDER BY Id DESC";
+		    transaction.executeSql(sql,undefined,function(transaction,result){
+            if(result.rows.length){
+
+            for(var i=0;i<result.rows.length;i++){
+                var row = result.rows.item(i);
+                var NumeroEmpleadoAplicado=row.NumeroEmpleadoAplicado;
+                var Id = row.Id;
+                var NombreArticulo = row.Articulo;
+                var FechaAsignacion = row.Fecha;
+                var EstadoPropiedad = row.Estado;
+                var AreaAsignacion = row.Area;
+                var DescripcionGeneral = row.Descripcion;
+                $("#itemlist1").append('<tr><td> id:' + Id + '</td><td>Empleado:' + NumeroEmpleadoAplicado + '</td><td> Articulo:' + NombreArticulo + '</td></tr>' + FechaAsignacion+'</td><td>Estado:'+EstadoPropiedad+'</td><td>Area:'+AreaAsignacion+'</td><td>Descripción:'+DescripcionGeneral);
+                
+            } 
+        }else{
+	        $("#itemlist1").append('<tr><td colspan="7" align="center">No se encuentran articulos</td></tr>');
+        }
+
+
+		},function(transaction,err){
+			alert('No se encuentra tabla. Click en "Crear Tabla" Para crear una tabla');
+		})
+	})
+}
+
+        
+
+        
+            loadData2();
+            $('#create2').click(function () {
+                db.transaction(function (transaction) {
+                    var sql2 = "CREATE TABLE Empleado" + "(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        "Nombre VARCHAR(50) NOT NULL," + "NumeroEmpleado INT(10) NOT NULL," + "Fecha DATE NOT NULL," +
+                        "Area TEXT NOT NULL," + "Domicilio TEXT NOT NULL)";
+                    transaction.executeSql(sql2,undefined,function(){
+	        	alert("La tabla fue creada");
+	            },function(){
+	              alert("La tabla ya ha sido creada");
+	                })
+                })
+            })
+            
+            $("#delete2").click(function(){
+                if (!confirm("Estas seguro que quieres borrar esta tabla?", "")) return;;
+            db.transaction(function(transaction){
+        	var sql2="DROP TABLE Empleado";
+        	transaction.executeSql(sql2,undefined,function(){
+	    	alert("La tabla se borro correctamente")
+        	},function(transaction,err){
+	    	alert(err.message);
+	                })
+                });
+            });
+
+            $("#insert2").click(function(){
+            var NumEmp=$("#NumeroEmpleado").val();
+                var Nom=$("#Nombre").val();
+                var Fecha = $("#Fecha").val();
+                var Area=$("#Area").val();
+                var Dom=$("#Domicilio").val();
+            db.transaction(function(transaction){
+            var sql2="INSERT INTO Empleado(Nombre,NumeroEmpleado,Fecha,Area,Domicilio) VALUES(?,?,?,?,?)";
+            transaction.executeSql(sql2,[Nom,NumEmp,Fecha,Area,Dom],function(){
+	        alert("Se añadio correctamente");
+            },function(transaction,err){
+	        alert(err.message);
+                    })
+            })
+
+            })
+             
+            $("#list2").click(function(){
+            loadData2();
+            })
+
+            function loadData2(){
+		    $("#itemlist2").children().remove();
+	        db.transaction(function(transaction){
+		    var sql2="SELECT * FROM Empleado ORDER BY Id DESC";
+		    transaction.executeSql(sql2,undefined,function(transaction,result){
+            if(result.rows.length){
+
+            for(var i=0;i<result.rows.length;i++){
+                var row = result.rows.item(i);
+                var NumeroEmpleado=row.NumeroEmpleado;
+                var Id = row.Id;
+                var Nombre = row.Nombre;
+                var Fecha = row.Fecha;
+                var Area = row.Area;
+                var Domicilio = row.Ddomicilio;
+                $("#itemlist2").append('<tr><td> id:' + Id + '</td><td>Nombre:' + Nombre + '</td><td> Numero:' + NumeroEmpleado + '</td></tr>' + Fecha+'</td><td>Area:'+Area);
+                
+            } 
+        }else{
+	        $("#itemlist2").append('<tr><td colspan="5" align="center">No se encuentran empleados</td></tr>');
+        }
+
+
+		},function(transaction,err){
+			alert('No se encuentra tabla. Click en "Crear Tabla" Para crear una tabla');
+		})
+	})
+}
+
+})
+
+    </script>
+    Christopher Salcedo Gallegos 1794067 ITS
+</body>
+</html>
